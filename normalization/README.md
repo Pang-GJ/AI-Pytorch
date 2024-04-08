@@ -24,15 +24,15 @@
 
 ### 公式
 
-输出 \(\hat{x}\) 的计算公式为：
+输出 $\hat{x}$ 的计算公式为：
 
-\[\hat{x} = \frac{x - \mathbb{E}_{\text{mini-batch}}(x)}{\sqrt{Var_{\text{mini-batch}}(x) + \epsilon}} \cdot \gamma + \beta\]
+$$\hat{x} = \frac{x - \mathbb{E}_{\text{mini-batch}}(x)}{\sqrt{Var_{\text{mini-batch}}(x) + \epsilon}} \cdot \gamma + \beta$$
 
-这里，\(\mathbb{E}_{\text{mini-batch}}(x)\) 和 \(Var_{\text{mini-batch}}(x)\) 是在小批量上按特征计算的均值和方差，\(\epsilon\) 是一个小的常数，用于数值稳定性。\(\gamma\) 和 \(\beta\) 分别是可学习的缩放和偏移参数。
+这里，$\mathbb{E}_{\text{mini-batch}}(x)$ 和 $Var_{\text{mini-batch}}(x)$ 是在小批量上按特征计算的均值和方差，$\epsilon$ 是一个小的常数，用于数值稳定性。$\gamma$ 和 $\beta$ 分别是可学习的缩放和偏移参数。
 
 ### 运行统计
 
-批量归一化还需要计算和存储均值和方差的运行统计。在训练期间，这些统计数据以指数移动平均（EMA）的形式计算，使用一个标量动量项 \(\alpha\) 更新，即 \(y*{EMA_i} = \alpha y*{EMA\_{i-1}} + (1 - \alpha)y_i\)，其中 \(i\) 是当前训练步骤。在推理期间，使用存储的运行统计数据来归一化单个样本。
+批量归一化还需要计算和存储均值和方差的运行统计。在训练期间，这些统计数据以指数移动平均（EMA）的形式计算，使用一个标量动量项 $\alpha$ 更新，即 $y*{EMA_i} = \alpha y*{EMA\_{i-1}} + (1 - \alpha)y_i$，其中 $i$ 是当前训练步骤。在推理期间，使用存储的运行统计数据来归一化单个样本。
 
 ### 属性
 
@@ -74,7 +74,7 @@ class BatchNorm(nn.Module):
         return self.gamma.unsqueeze(0).unsqueeze(1) * x_norm + self.beta.unsqueeze(0).unsqueeze(1)
 ```
 
-假设我们的输入 \(x\) 的形状为 (batch, seq_len, d_model)，在批量归一化中，我们在批处理和序列长度维度（分别为 0 和 1）上进行归一化，但保持特征维度（d_model）不变。这是因为 BatchNorm 旨在稳定小批量中每个特征的分布。
+假设我们的输入 $x$ 的形状为 (batch, seq_len, d_model)，在批量归一化中，我们在批处理和序列长度维度（分别为 0 和 1）上进行归一化，但保持特征维度（d_model）不变。这是因为 BatchNorm 旨在稳定小批量中每个特征的分布。
 
 ## 层归一化（LayerNorm）
 
@@ -84,11 +84,11 @@ class BatchNorm(nn.Module):
 
 ### 公式
 
-输出 \(\hat{x}\) 的计算方式与批量归一化类似，但在计算 \(\mathbb{E}(x)\) 和 \(Var(x)\) 的轴上有所不同。
+输出 $\hat{x}$ 的计算方式与批量归一化类似，但在计算 $\mathbb{E}(x)$ 和 $Var(x)$ 的轴上有所不同。
 
-\[\hat{x} = \frac{x - \mathbb{E}_{\text{features}}(x)}{\sqrt{Var_{\text{feature}}(x) + \epsilon}} \cdot \gamma + \beta\]
+$$\hat{x} = \frac{x - \mathbb{E}_{\text{features}}(x)}{\sqrt{Var_{\text{feature}}(x) + \epsilon}} \cdot \gamma + \beta$$
 
-这里，\(\mathbb{E}_{\text{features}}(x)\) 和 \(Var_{\text{features}}(x)\) 是在特征维度上计算的均值和方差。
+这里，$\mathbb{E}_{\text{features}}(x)$ 和 $Var_{\text{features}}(x)$ 是在特征维度上计算的均值和方差。
 
 ### 属性
 
@@ -131,19 +131,19 @@ class LayerNorm(nn.Module):
         return self.gamma.unsqueeze(0).unsqueeze(1) * x_norm + self.beta.unsqueeze(0).unsqueeze(1)
 ```
 
-假设我们的输入 \(x\) 的形状为 (batch, seq_len, d_model)，层归一化在批处理中每个序列的特征维度（d_model）上进行归一化。这样做的目的是使单个数据点的所有特征归一化到零均值和单位方差，从而使模型对输入特征的规模不那么敏感。
+假设我们的输入 $x$ 的形状为 (batch, seq_len, d_model)，层归一化在批处理中每个序列的特征维度（d_model）上进行归一化。这样做的目的是使单个数据点的所有特征归一化到零均值和单位方差，从而使模型对输入特征的规模不那么敏感。
 
 ## 平方根均值层归一化（RMSNorm）
 
 ### 概述
 
-RMSNorm[3] 是 LayerNorm 的一个变体，它使用均方根 \(\mathbb{E}(x^2)\) 而不是标准差进行重新缩放，并且不使用重新居中操作。作者假设 LayerNorm 中的重新居中不变性质是可有可无的，只保留了重新缩放不变性质。
+RMSNorm[3] 是 LayerNorm 的一个变体，它使用均方根 $\mathbb{E}(x^2)$ 而不是标准差进行重新缩放，并且不使用重新居中操作。作者假设 LayerNorm 中的重新居中不变性质是可有可无的，只保留了重新缩放不变性质。
 
 ### 公式
 
-输出 \(\hat{x}\) 的计算公式为：
+输出 $\hat{x}$ 的计算公式为：
 
-\[\hat{x} = \frac{x}{ \sqrt{\mathbb{E}\_{\text{feature}}(x^2) + \epsilon}} \cdot \gamma\]
+$$\hat{x} = \frac{x}{ \sqrt{\mathbb{E}\_{\text{feature}}(x^2) + \epsilon}} \cdot \gamma$$
 
 ### 属性
 
@@ -177,7 +177,7 @@ class RMSNorm(nn.Module):
         return self.gamma.unsqueeze(0).unsqueeze(1) * x_norm
 ```
 
-假设我们的输入 \(x\) 的形状为 (batch, seq_len, d_model)，对于 RMS 层归一化，与 LN 一样，我们在特征维度（d_model）上进行归一化。我们使用序列中每个数据点的特征值的均方根进行归一化。这种方法计算效率高，并且对异常值更加稳健。
+假设我们的输入 $x$ 的形状为 (batch, seq_len, d_model)，对于 RMS 层归一化，与 LN 一样，我们在特征维度（d_model）上进行归一化。我们使用序列中每个数据点的特征值的均方根进行归一化。这种方法计算效率高，并且对异常值更加稳健。
 
 ## 计算复杂度和内存要求
 
